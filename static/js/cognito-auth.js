@@ -113,6 +113,7 @@
     });
 
     function handleSignin(event) {
+        console.log('handleSignin được gọi');
         event.preventDefault(); // Ngăn chặn hành động mặc định của form
     
         var email = $('#emailInputSignin').val(); // Lấy giá trị email từ form
