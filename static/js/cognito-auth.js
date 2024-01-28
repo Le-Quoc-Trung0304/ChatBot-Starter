@@ -1,9 +1,7 @@
 /*global WildRydes _config AmazonCognitoIdentity AWSCognito*/
 
-var WildRydes = window.WildRydes || {};
-
 (function scopeWrapper($) {
-    var signinUrl = '/signin';
+    // var signinUrl = '/signin';
 
     var poolData = {
         UserPoolId: _config.cognito.userPoolId,
@@ -52,23 +50,23 @@ var WildRydes = window.WildRydes || {};
      * Cognito User Pool functions
      */
 
-    function register(email, password, onSuccess, onFailure) {
-        var dataEmail = {
-            Name: 'email',
-            Value: email
-        };
-        var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
+    // function register(email, password, onSuccess, onFailure) {
+    //     var dataEmail = {
+    //         Name: 'email',
+    //         Value: email
+    //     };
+    //     var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
 
-        userPool.signUp(toUsername(email), password, [attributeEmail], null,
-            function signUpCallback(err, result) {
-                if (!err) {
-                    onSuccess(result);
-                } else {
-                    onFailure(err);
-                }
-            }
-        );
-    }
+    //     userPool.signUp(toUsername(email), password, [attributeEmail], null,
+    //         function signUpCallback(err, result) {
+    //             if (!err) {
+    //                 onSuccess(result);
+    //             } else {
+    //                 onFailure(err);
+    //             }
+    //         }
+    //     );
+    // }
 
     function signin(email, password, onSuccess, onFailure) {
         var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails({
@@ -83,15 +81,15 @@ var WildRydes = window.WildRydes || {};
         });
     }
 
-    function verify(email, code, onSuccess, onFailure) {
-        createCognitoUser(email).confirmRegistration(code, true, function confirmCallback(err, result) {
-            if (!err) {
-                onSuccess(result);
-            } else {
-                onFailure(err);
-            }
-        });
-    }
+    // function verify(email, code, onSuccess, onFailure) {
+    //     createCognitoUser(email).confirmRegistration(code, true, function confirmCallback(err, result) {
+    //         if (!err) {
+    //             onSuccess(result);
+    //         } else {
+    //             onFailure(err);
+    //         }
+    //     });
+    // }
 
     function createCognitoUser(email) {
         return new AmazonCognitoIdentity.CognitoUser({
@@ -115,59 +113,61 @@ var WildRydes = window.WildRydes || {};
     });
 
     function handleSignin(event) {
-        var email = $('#emailInputSignin').val();
-        var password = $('#passwordInputSignin').val();
-        event.preventDefault();
+        event.preventDefault(); // Ngăn chặn hành động mặc định của form
+    
+        var email = $('#emailInputSignin').val(); // Lấy giá trị email từ form
+        var password = $('#passwordInputSignin').val(); // Lấy giá trị mật khẩu từ form
+    
         signin(email, password,
             function signinSuccess() {
                 console.log('Successfully Logged In');
-                window.location.href = '/chat';
+                window.location.href = '/chat'; // Chuyển hướng đến '/chat' sau khi đăng nhập thành công
             },
             function signinError(err) {
-                alert(err);
+                alert(err); // Hiển thị thông báo lỗi
             }
         );
     }
 
-    function handleRegister(event) {
-        var email = $('#emailInputRegister').val();
-        var password = $('#passwordInputRegister').val();
-        var password2 = $('#password2InputRegister').val();
+    // function handleRegister(event) {
+    //     var email = $('#emailInputRegister').val();
+    //     var password = $('#passwordInputRegister').val();
+    //     var password2 = $('#password2InputRegister').val();
 
-        var onSuccess = function registerSuccess(result) {
-            var cognitoUser = result.user;
-            console.log('user name is ' + cognitoUser.getUsername());
-            var confirmation = ('Registration successful. Please check your email inbox or spam folder for your verification code.');
-            if (confirmation) {
-                window.location.href = 'verify.html';
-            }
-        };
-        var onFailure = function registerFailure(err) {
-            alert(err);
-        };
-        event.preventDefault();
+    //     var onSuccess = function registerSuccess(result) {
+    //         var cognitoUser = result.user;
+    //         console.log('user name is ' + cognitoUser.getUsername());
+    //         var confirmation = ('Registration successful. Please check your email inbox or spam folder for your verification code.');
+    //         if (confirmation) {
+    //             window.location.href = 'verify.html';
+    //         }
+    //     };
+    //     var onFailure = function registerFailure(err) {
+    //         alert(err);
+    //     };
+    //     event.preventDefault();
 
-        if (password === password2) {
-            register(email, password, onSuccess, onFailure);
-        } else {
-            alert('Passwords do not match');
-        }
-    }
+    //     if (password === password2) {
+    //         register(email, password, onSuccess, onFailure);
+    //     } else {
+    //         alert('Passwords do not match');
+    //     }
+    // }
 
-    function handleVerify(event) {
-        var email = $('#emailInputVerify').val();
-        var code = $('#codeInputVerify').val();
-        event.preventDefault();
-        verify(email, code,
-            function verifySuccess(result) {
-                console.log('call result: ' + result);
-                console.log('Successfully verified');
-                alert('Verification successful. You will now be redirected to the login page.');
-                window.location.href = signinUrl;
-            },
-            function verifyError(err) {
-                alert(err);
-            }
-        );
-    }
+    // function handleVerify(event) {
+    //     var email = $('#emailInputVerify').val();
+    //     var code = $('#codeInputVerify').val();
+    //     event.preventDefault();
+    //     verify(email, code,
+    //         function verifySuccess(result) {
+    //             console.log('call result: ' + result);
+    //             console.log('Successfully verified');
+    //             alert('Verification successful. You will now be redirected to the login page.');
+    //             window.location.href = signinUrl;
+    //         },
+    //         function verifyError(err) {
+    //             alert(err);
+    //         }
+    //     );
+    // }
 }(jQuery));
