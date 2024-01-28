@@ -94,7 +94,7 @@ def chat():
     return output
 
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['PUT'])
 def upload_file():
     file = request.files['file']
     filename = file.filename
