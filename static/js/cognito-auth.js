@@ -1,7 +1,9 @@
 /*global WildRydes _config AmazonCognitoIdentity AWSCognito*/
 
+var WildRydes = window.WildRydes || {};
+
 (function scopeWrapper($) {
-    var signinUrl = '/signin';
+    var signinUrl = '/signin.html';
 
     var poolData = {
         UserPoolId: _config.cognito.userPoolId,
@@ -112,17 +114,17 @@
         $('#verifyForm').submit(handleVerify);
     });
 
-    function handleSignin(event) {    
-        var email = $('#emailInputSignin').val(); // Lấy giá trị email từ form
-        var password = $('#passwordInputSignin').val(); // Lấy giá trị mật khẩu từ form
-    
+    function handleSignin(event) {
+        var email = $('#emailInputSignin').val();
+        var password = $('#passwordInputSignin').val();
+        event.preventDefault();
         signin(email, password,
             function signinSuccess() {
                 console.log('Successfully Logged In');
-                window.location.href = '/chat'; // Chuyển hướng đến '/chat' sau khi đăng nhập thành công
+                window.location.href = 'chat';
             },
             function signinError(err) {
-                alert(err); // Hiển thị thông báo lỗi
+                alert(err);
             }
         );
     }
