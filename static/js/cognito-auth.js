@@ -3,7 +3,7 @@
 var WildRydes = window.WildRydes || {};
 
 (function scopeWrapper($) {
-    var signinUrl = '/signin.html';
+    var signinUrl = '/signin';
 
     var poolData = {
         UserPoolId: _config.cognito.userPoolId,
@@ -121,7 +121,7 @@ var WildRydes = window.WildRydes || {};
         signin(email, password,
             function signinSuccess() {
                 console.log('Successfully Logged In');
-                window.location.href = 'chat.html';
+                window.location.href = '/chat';
             },
             function signinError(err) {
                 alert(err);
