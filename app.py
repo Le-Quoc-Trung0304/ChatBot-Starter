@@ -77,7 +77,7 @@ def signin():
 
 @app.route("/chat")
 def chat_page():
-    return render_template('chat.html')
+    return render_template('ride.html')
 
 
 @app.route("/get", methods=["GET", "POST"])
