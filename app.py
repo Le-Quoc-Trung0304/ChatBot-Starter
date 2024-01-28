@@ -1,7 +1,10 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, jsonify, request
 import requests
+import os
 # from transformers import AutoModelForCausalLM, AutoTokenizer
 # import torch
+
+
 
 api_base = "https://api.endpoints.anyscale.com/v1"
 api_key = "esecret_qvsm393q5xuqilb2kbfyr17fbl"
@@ -68,9 +71,10 @@ def wrap_text(text, max_line_length):
 
 app = Flask(__name__)
 
+
 @app.route("/")
 def index():
-    return render_template('chat_1.html')
+    return render_template('index.html')
 
 
 @app.route("/get", methods=["GET", "POST"])
@@ -85,6 +89,24 @@ def chat():
     chat_history.append(input)
     chat_history.append(output)
     return output
+
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    file = request.files['file']
+    filename = file.filename
+
+    # Xây dựng URL cho API S3 của bạn
+    s3_url = f'https://bxvel9b1vi.execute-api.ap-southeast-2.amazonaws.com/dev/chatbot-user-upload/trunglq/{filename}'
+
+    # Gửi file đến API S3 sử dụng phương thức PUT
+    files = {'file': (filename, file.stream, file.mimetype)}
+    response = requests.put(s3_url, files=files)
+
+    if response.status_code == 200:
+        return jsonify({'message': 'Tải lên thành công'})
+    else:
+        return jsonify({'error': 'Lỗi khi tải lên S3'}), 500
 
 
 if __name__ == '__main__':
