@@ -75,7 +75,7 @@ app = Flask(__name__)
 def signin():
     return render_template('signin.html')
 
-@app.route("/chat")
+@app.route("/ride.html")
 def chat_page():
     return render_template('ride.html')
 

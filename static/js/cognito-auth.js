@@ -70,18 +70,18 @@ var WildRydes = window.WildRydes || {};
         );
     }
 
-    function signin(email, password, onSuccess, onFailure) {
-        var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails({
-            Username: toUsername(email),
-            Password: password
-        });
+    // function signin(email, password, onSuccess, onFailure) {
+    //     var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails({
+    //         Username: toUsername(email),
+    //         Password: password
+    //     });
 
-        var cognitoUser = createCognitoUser(email);
-        cognitoUser.authenticateUser(authenticationDetails, {
-            onSuccess: onSuccess,
-            onFailure: onFailure
-        });
-    }
+    //     var cognitoUser = createCognitoUser(email);
+    //     cognitoUser.authenticateUser(authenticationDetails, {
+    //         onSuccess: onSuccess,
+    //         onFailure: onFailure
+    //     });
+    // }
 
     function verify(email, code, onSuccess, onFailure) {
         createCognitoUser(email).confirmRegistration(code, true, function confirmCallback(err, result) {
@@ -114,20 +114,20 @@ var WildRydes = window.WildRydes || {};
         $('#verifyForm').submit(handleVerify);
     });
 
-    function handleSignin(event) {
-        var email = $('#emailInputSignin').val();
-        var password = $('#passwordInputSignin').val();
-        event.preventDefault();
-        signin(email, password,
-            function signinSuccess() {
-                console.log('Successfully Logged In');
-                window.location.href = 'chat.html';
-            },
-            function signinError(err) {
-                alert(err);
-            }
-        );
-    }
+    // function handleSignin(event) {
+    //     var email = $('#emailInputSignin').val();
+    //     var password = $('#passwordInputSignin').val();
+    //     event.preventDefault();
+    //     signin(email, password,
+    //         function signinSuccess() {
+    //             console.log('Successfully Logged In');
+    //             window.location.href = 'chat.html';
+    //         },
+    //         function signinError(err) {
+    //             alert(err);
+    //         }
+    //     );
+    // }
 
     function handleRegister(event) {
         var email = $('#emailInputRegister').val();
