@@ -9,8 +9,6 @@ $(document).ready(function() {
         // Không cần xử lý gì đặc biệt cho trường hợp Shift+Enter
     });
 
-
-
     $("#messageArea").on("submit", function(event) {
         const date = new Date();
         const hour = date.getHours();
@@ -42,25 +40,38 @@ $(document).ready(function() {
     }
 });
 
-document.getElementById('uploadButton').addEventListener('click', function() {
-    var fileInput = document.getElementById('fileInput');
-    var file = fileInput.files[0];
-    var formData = new FormData();
-    formData.append('file', file);
 
-    fetch('/upload', {
-        method: 'PUT',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        alert('Tải lên thành công!');
-    })
-    .catch(error => {
-        console.error('Lỗi khi tải lên:', error);
-        alert('Lỗi khi tải lên.');
+$(document).ready(function() {
+    // Xử lý sự kiện click cho nút Tải lên
+    $('#uploadButton').on('click', function() {
+        console.log('Nút Tải lên được click');
+
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+        if (!file) {
+            alert("Vui lòng chọn một file để tải lên.");
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/upload', {
+            method: 'PUT', // Hoặc 'POST', tùy thuộc vào cấu hình server của bạn
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            alert('Tải lên thành công!');
+        })
+        .catch(error => {
+            console.error('Lỗi khi tải lên:', error);
+            alert('Lỗi khi tải lên.');
+        });
     });
+
+    // Các hàm xử lý khác ở đây
 });
 
 

@@ -71,10 +71,13 @@ def wrap_text(text, max_line_length):
 
 app = Flask(__name__)
 
+@app.route("/signin")
+def signin():
+    return render_template('signin.html')
 
-@app.route("/")
-def index():
-    return render_template('index.html')
+@app.route("/chat")
+def chat_page():
+    return render_template('chat.html')
 
 
 @app.route("/get", methods=["GET", "POST"])
