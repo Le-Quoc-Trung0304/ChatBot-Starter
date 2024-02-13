@@ -1,4 +1,3 @@
-
 $(document).ready(function() {
     $('#text').keydown(function(e) {
         // Nếu người dùng nhấn Enter mà không giữ Shift
@@ -15,6 +14,8 @@ $(document).ready(function() {
         const minute = date.getMinutes();
         const str_time = hour+":"+minute;
         var rawText = $("#text").val();
+        var selectedModel = $("#modelSelect").val();
+        var selectDocument = $("#documentSelect").val();
 
         var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send"><pre>' + rawText + '</pre><span class="msg_time_send">' + str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
         $("#text").val("");
@@ -22,14 +23,17 @@ $(document).ready(function() {
         scrollToBottom();
         $.ajax({
             data: {
-                msg: rawText,	
+                msg: rawText,
+                model: selectedModel,
+                document: selectDocument
             },
             type: "POST",
             url: "/get",
+            contentType: "application/x-www-form-urlencoded", // Đặt kiểu dữ liệu của yêu cầu thành form data
         }).done(function(data) {
             var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer"><pre>' + data + '</pre><span class="msg_time">' + str_time + '</span></div></div>';
-        $("#messageFormeight").append($.parseHTML(botHtml));
-        scrollToBottom();
+            $("#messageFormeight").append($.parseHTML(botHtml));
+            scrollToBottom();
         });
         event.preventDefault();
     });
@@ -39,6 +43,7 @@ $(document).ready(function() {
     messages.scrollTop(messages[0].scrollHeight);
     }
 });
+
 
 
 $(document).ready(function() {

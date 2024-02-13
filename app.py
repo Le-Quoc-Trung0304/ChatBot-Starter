@@ -17,7 +17,7 @@ url = f"{api_base}/chat/completions"
 
 
 chat_history = []
-def get_Chat_response(text):
+def llama34b_response(text):
     history_text = ''
     for index, i in enumerate(chat_history):
         if index%2 == 0:
@@ -68,7 +68,11 @@ def wrap_text(text, max_line_length):
 
     return '\n'.join(wrapped_lines)
 
+def vinallama_responces(text):
+    return "Vinallama"
 
+def chatgpt_4_response(text):
+    return "Chatgpt"
 app = Flask(__name__)
 
 @app.route("/")
@@ -95,13 +99,19 @@ def chat_page():
 @app.route("/get", methods=["GET", "POST"])
 def chat():
     msg = request.form["msg"]
-    input = msg
-    output = get_Chat_response(input)
-    print(input)
-    print(output)
+    model = request.form["model"] # Default is 'Select Model'
+    document = request.form["document"] # Defaultis "Select Document"
+
+    output = llama34b_response(msg)
+    if model == "Llama 34b" or model == "Select Model":
+        output = llama34b_response(msg)
+    elif model == "VinaLlama 7b":
+        output = vinallama_responces(msg)
+    elif model == "ChatGPT 4":
+        output = chatgpt_4_response(msg)
+
     output = wrap_text(output, 80)
-    print(output)
-    chat_history.append(input)
+    chat_history.append(msg)
     chat_history.append(output)
     return output
 
