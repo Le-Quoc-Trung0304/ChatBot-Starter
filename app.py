@@ -119,20 +119,34 @@ def chat():
 @app.route('/upload', methods=['PUT'])
 def upload_file():
     file = request.files['file']
-    filename = file.filename
+    file_name = file.filename
+    try:
+        user_name = request.form['user_name']
+    except:
+        user_name = 'trunglq'
 
-    # Xây dựng URL cho API S3 của bạn
-    s3_url = f'https://bxvel9b1vi.execute-api.ap-southeast-2.amazonaws.com/dev/chatbot-user-upload/trunglq/{filename}'
+    s3_url = f'https://bxvel9b1vi.execute-api.ap-southeast-2.amazonaws.com/dev/chatbot-user-upload/{user_name}/{file_name}'
+    ec2_url = 'https://qotvnsyf13.execute-api.ap-southeast-2.amazonaws.com/vector-database-stage/upload'
 
     # Gửi file đến API S3 sử dụng phương thức PUT
-    files = {'file': (filename, file.stream, file.mimetype)}
-    response = requests.put(s3_url, files=files)
+    files = {'file': (file_name, file.stream, file.mimetype)}
+    response_s3 = requests.put(s3_url, files=files)
 
-    if response.status_code == 200:
-        return jsonify({'message': 'Tải lên thành công'})
+
+    if response_s3.status_code == 200:
+        # Gửi yêu cầu PUT đến EC2
+        data = {'user_name': user_name, 'file_name': file_name}
+        response_ec2 = requests.put(ec2_url, json=data)
+
+        if response_ec2.status_code == 200:
+            return jsonify({'message': 'Tải lên thành công và xử lý thành công'})
+        else:
+            return jsonify({'error': 'Lỗi khi xử lý trên EC2'}), 500
     else:
         return jsonify({'error': 'Lỗi khi tải lên S3'}), 500
 
 
 if __name__ == '__main__':
     app.run(port=8888)
+#sudo systemctl stop apache2
+#sudo systemctl disable apache2

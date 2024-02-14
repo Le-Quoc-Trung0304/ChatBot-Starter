@@ -60,6 +60,9 @@ $(document).ready(function() {
 
         var formData = new FormData();
         formData.append('file', file);
+        // Thêm trường 'user_name' vào formData
+        var userName = '';
+        formData.append('user_name', userName);
 
         fetch('/upload', {
             method: 'PUT', // Hoặc 'POST', tùy thuộc vào cấu hình server của bạn
@@ -75,8 +78,10 @@ $(document).ready(function() {
             alert('Lỗi khi tải lên.');
         });
     });
+}
+);
 
-    // Các hàm xử lý khác ở đây
-});
+
+
 
 
