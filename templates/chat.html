@@ -24,6 +24,13 @@
             margin-bottom: 20px; /* Khoảng cách dưới giữa các div */
         }
     </style>
+    <script>
+        // Kiểm tra trạng thái đăng nhập ở đây
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'signin'; // Chưa đăng nhập
+            alert('You have to signin')
+        }
+        </script>
 </head>
 <body>
 
@@ -35,9 +42,6 @@
     <div class="custom-div" style="z-index: 2;"> <!-- Xếp thứ hai -->
         <select id="documentSelect" class="custom-select">
             <option selected>Select Document</option>
-            <option value="2210.04186.pdf">2210.04186.pdf</option>
-            <option value="test_2.txt">test_2.txt</option>
-            <!-- Thêm các option khác nếu cần -->
         </select>
     </div>
     

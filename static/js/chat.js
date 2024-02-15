@@ -16,6 +16,7 @@ $(document).ready(function() {
         var rawText = $("#text").val();
         var selectedModel = $("#modelSelect").val();
         var selectDocument = $("#documentSelect").val();
+        var userName = localStorage.getItem('userEmail');
 
         var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send"><pre>' + rawText + '</pre><span class="msg_time_send">' + str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
         $("#text").val("");
@@ -25,7 +26,8 @@ $(document).ready(function() {
             data: {
                 msg: rawText,
                 model: selectedModel,
-                document: selectDocument
+                document: selectDocument,
+                user_name: userName
             },
             type: "POST",
             url: "/get",
@@ -59,9 +61,8 @@ $(document).ready(function() {
         }
 
         var formData = new FormData();
+        var userName = localStorage.getItem('userEmail'); 
         formData.append('file', file);
-        // Thêm trường 'user_name' vào formData
-        var userName = '';
         formData.append('user_name', userName);
 
         fetch('/upload', {
@@ -81,6 +82,37 @@ $(document).ready(function() {
 }
 );
 
+
+$(document).ready(function() {
+    $('#documentSelect').on('focus', function() {
+        var userName = localStorage.getItem('userEmail'); // Lấy email người dùng từ localStorage
+        // Chỉ gửi request nếu dropdown chưa được cập nhật
+        if ($('#documentSelect option').length >= 0) {
+            $.ajax({
+                url: '/list_document',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ 'user_name': userName }),
+                success: function(response) {
+                    // Cập nhật dropdown với danh sách tài liệu nhận được
+                    updateDocumentsDropdown(response.documents);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching documents:", error);
+                }
+            });
+        }
+    });
+});
+
+function updateDocumentsDropdown(documents) {
+    var $select = $('#documentSelect');
+    $select.empty(); // Xóa các lựa chọn cũ
+    $select.append($('<option>').text("Select Document").attr('selected', true));
+    documents.forEach(function(doc) {
+        $select.append($('<option>').text(doc.split('/').pop()).attr('value', doc));
+    });
+}
 
 
 

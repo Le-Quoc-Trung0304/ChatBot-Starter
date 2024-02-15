@@ -1,8 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 import requests
 import os
-# from transformers import AutoModelForCausalLM, AutoTokenizer
-# import torch
+import boto3
 
 
 
@@ -14,10 +13,14 @@ headers = {
     "Authorization": f"Bearer {api_key}"
 }
 url = f"{api_base}/chat/completions"
+model_path = os.getenv('MODEL_WEIGHTS_PATH', '.')
+s3 = boto3.client('s3')
+collection_name = 'user_vector_collection'
+bucket_name = 'chatbot-user-upload'
 
 
 chat_history = []
-def llama34b_response(text):
+def llama34b_response(text, rag_flag, rag_info):
     history_text = ''
     for index, i in enumerate(chat_history):
         if index%2 == 0:
@@ -25,20 +28,34 @@ def llama34b_response(text):
         else:
             history_text = history_text + '\n' + 'system:' + i
 
-    all_text = history_text + '\n'+ 'user:' + text
-
-
-    data = {
-        "model": "codellama/CodeLlama-34b-Instruct-hf",
-        "messages": [
-            {"role": "user", "content": f'''{all_text}'''}
-            # {"role": "user", "content": "Hello!"}
-        ],
-        "temperature": 0.7,
-        "top_p":0.1,
-        "max_token":128
-    }
-    response = requests.post(url, headers=headers, json=data)
+    if rag_flag:
+        all_text = history_text + '\n'+ 'user:' + text + 'Provided context:\n' + rag_info
+        data = {
+            "model": "codellama/CodeLlama-34b-Instruct-hf",
+            "messages": [
+                {"role": "system", "content": "You are helpful assistant. You will awnser the question based on provided context."},
+                {"role": "user", "content": f'''{all_text}'''}
+                
+            ],
+            "temperature": 0.7,
+            "top_p":0.1,
+            "max_token":128
+        }
+        response = requests.post(url, headers=headers, json=data)
+    else:
+        all_text = history_text + '\n'+ 'user:' + text
+        data = {
+            "model": "codellama/CodeLlama-34b-Instruct-hf",
+            "messages": [
+                {"role": "system", "content": "You are helpful assistant."},
+                {"role": "user", "content": f'''{all_text}'''}
+                
+            ],
+            "temperature": 0.7,
+            "top_p":0.1,
+            "max_token":128
+        }
+        response = requests.post(url, headers=headers, json=data)
 
     if response.status_code == 200:
         result = response.json()
@@ -68,11 +85,14 @@ def wrap_text(text, max_line_length):
 
     return '\n'.join(wrapped_lines)
 
-def vinallama_responces(text):
+def vinallama_responces(text, rag_flag, rag_info):
     return "Vinallama"
 
-def chatgpt_4_response(text):
+def chatgpt_4_response(text, rag_flag, rag_info):
     return "Chatgpt"
+
+
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -99,16 +119,33 @@ def chat_page():
 @app.route("/get", methods=["GET", "POST"])
 def chat():
     msg = request.form["msg"]
-    model = request.form["model"] # Default is 'Select Model'
-    document = request.form["document"] # Defaultis "Select Document"
+    model = request.form["model"] 
+    user_name = request.form["user_name"] 
+    document = request.form["document"] 
+    document = document.replace(user_name+'/','')
+    query_url = 'https://qotvnsyf13.execute-api.ap-southeast-2.amazonaws.com/vector-database-stage/query'
+    rag_info = ''
+    rag_flag = False
 
-    output = llama34b_response(msg)
+    if document == 'Select Document':
+        pass
+    else:
+        rag_flag = True
+        data = {
+            'query':msg,
+            'user_name': user_name,
+            'file_name': document
+        }
+        response = requests.post(query_url, json=data)
+        
+        for result in response.json()['results']:
+            rag_info += '\n- ' + result['text']
     if model == "Llama 34b" or model == "Select Model":
-        output = llama34b_response(msg)
+        output = llama34b_response(msg, rag_flag, rag_info)
     elif model == "VinaLlama 7b":
-        output = vinallama_responces(msg)
+        output = vinallama_responces(msg, rag_flag, rag_info)
     elif model == "ChatGPT 4":
-        output = chatgpt_4_response(msg)
+        output = chatgpt_4_response(msg, rag_flag, rag_info)
 
     output = wrap_text(output, 80)
     chat_history.append(msg)
@@ -119,11 +156,8 @@ def chat():
 @app.route('/upload', methods=['PUT'])
 def upload_file():
     file = request.files['file']
+    user_name = request.form['user_name'] 
     file_name = file.filename
-    try:
-        user_name = request.form['user_name']
-    except:
-        user_name = 'trunglq'
 
     s3_url = f'https://bxvel9b1vi.execute-api.ap-southeast-2.amazonaws.com/dev/chatbot-user-upload/{user_name}/{file_name}'
     ec2_url = 'https://qotvnsyf13.execute-api.ap-southeast-2.amazonaws.com/vector-database-stage/upload'
@@ -144,7 +178,20 @@ def upload_file():
             return jsonify({'error': 'Lỗi khi xử lý trên EC2'}), 500
     else:
         return jsonify({'error': 'Lỗi khi tải lên S3'}), 500
-
+@app.route('/list_document', methods=['POST'])
+def get_list_document_for_user():
+    data = request.json
+    user_name = data.get('user_name')
+    try:
+        response = s3.list_objects_v2(Bucket=bucket_name, Prefix=user_name + '/')
+        documents = []
+        if 'Contents' in response:
+            documents = [item['Key'] for item in response['Contents']]
+        return jsonify({'documents': documents})
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500
+        
 
 if __name__ == '__main__':
     app.run(port=8888)

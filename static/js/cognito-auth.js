@@ -122,9 +122,13 @@ var WildRydes = window.WildRydes || {};
             function signinSuccess() {
                 console.log('Successfully Logged In');
                 window.location.href = 'chat';
+                localStorage.setItem('isLoggedIn', true);
+                localStorage.setItem('userEmail', email);
+
             },
             function signinError(err) {
                 alert(err);
+                localStorage.setItem('isLoggedIn', false);
             }
         );
     }
