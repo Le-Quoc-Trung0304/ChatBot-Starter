@@ -29,11 +29,12 @@ def llama34b_response(text, rag_flag, rag_info):
             history_text = history_text + '\n' + 'system:' + i
 
     if rag_flag:
-        all_text = history_text + '\n'+ 'user:' + text + 'Provided context:\n' + rag_info
+        all_text = 'Question:\n' + text + '\nProvided context:\n' + rag_info
         data = {
             "model": "codellama/CodeLlama-34b-Instruct-hf",
+            # "model": "codellama/CodeLlama-70b-Instruct-hf",
             "messages": [
-                {"role": "system", "content": "You are helpful assistant. You will awnser the question based on provided context."},
+                {"role": "system", "content": "You are helpful assistant. Based on the provided context you will reasoning about the question. Answer by Vietnamese."},
                 {"role": "user", "content": f'''{all_text}'''}
                 
             ],
@@ -41,13 +42,17 @@ def llama34b_response(text, rag_flag, rag_info):
             "top_p":0.1,
             "max_token":128
         }
+        print(all_text)
         response = requests.post(url, headers=headers, json=data)
     else:
         all_text = history_text + '\n'+ 'user:' + text
         data = {
             "model": "codellama/CodeLlama-34b-Instruct-hf",
+            # "model": "codellama/CodeLlama-70b-Instruct-hf",
+
             "messages": [
-                {"role": "system", "content": "You are helpful assistant."},
+                {"role": "system", "content": "You are helpful assistant.Chat in Vietnamese."},
+
                 {"role": "user", "content": f'''{all_text}'''}
                 
             ],
@@ -55,6 +60,8 @@ def llama34b_response(text, rag_flag, rag_info):
             "top_p":0.1,
             "max_token":128
         }
+        print(all_text)
+
         response = requests.post(url, headers=headers, json=data)
 
     if response.status_code == 200:
@@ -126,7 +133,8 @@ def chat():
     query_url = 'https://qotvnsyf13.execute-api.ap-southeast-2.amazonaws.com/vector-database-stage/query'
     rag_info = ''
     rag_flag = False
-
+    print(user_name)
+    print(document)
     if document == 'Select Document':
         pass
     else:
